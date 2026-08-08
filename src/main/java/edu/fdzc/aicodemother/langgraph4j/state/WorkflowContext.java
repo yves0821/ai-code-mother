@@ -1,6 +1,7 @@
 package edu.fdzc.aicodemother.langgraph4j.state;
 
 import edu.fdzc.aicodemother.langgraph4j.model.ImageResource;
+import edu.fdzc.aicodemother.langgraph4j.model.QualityResult;
 import edu.fdzc.aicodemother.model.enums.CodeGenTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -67,6 +68,12 @@ public class WorkflowContext implements Serializable {
      * 构建成功的目录
      */
     private String buildResultDir;
+
+    /**
+     * 质量检查结果
+     */
+    private QualityResult qualityResult;
+
 
     /**
      * 错误信息
