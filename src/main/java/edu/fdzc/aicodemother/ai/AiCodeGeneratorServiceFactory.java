@@ -9,6 +9,8 @@ import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
 import dev.langchain4j.service.AiServices;
+import edu.fdzc.aicodemother.ai.guardrail.PromptSafetyInputGuardrail;
+import edu.fdzc.aicodemother.ai.guardrail.RetryOutputGuardrail;
 import edu.fdzc.aicodemother.ai.tools.*;
 import edu.fdzc.aicodemother.exception.BusinessException;
 import edu.fdzc.aicodemother.exception.ErrorCode;
@@ -84,25 +86,6 @@ public class AiCodeGeneratorServiceFactory {
     }
 
 
-    /**
-     * 创建新的 AI 服务实例
-     */
-    private AiCodeGeneratorService createAiCodeGeneratorService(long appId) {
-        log.info("为 appId: {} 创建新的 AI 服务实例", appId);
-        // 根据 appId 构建独立的对话记忆
-        MessageWindowChatMemory chatMemory = MessageWindowChatMemory
-                .builder()
-                .id(appId)
-                .chatMemoryStore(redisChatMemoryStore)
-                .maxMessages(50)
-                .build();
-        chatHistoryService.loadChatHistoryToMemory(appId, chatMemory, 20);
-        return AiServices.builder(AiCodeGeneratorService.class)
-                .chatModel(chatModel)
-                .streamingChatModel(openAiStreamingChatModel)
-                .chatMemory(chatMemory)
-                .build();
-    }
 
     /**
      * 默认提供一个 Bean
@@ -139,6 +122,8 @@ public class AiCodeGeneratorServiceFactory {
                         .hallucinatedToolNameStrategy(toolExecutionRequest -> ToolExecutionResultMessage.from(
                                 toolExecutionRequest, "Error: there is no tool called " + toolExecutionRequest.name()
                         ))
+                        .inputGuardrails(new PromptSafetyInputGuardrail()) // 添加输入护轨
+                        .outputGuardrails(new RetryOutputGuardrail()) // 添加输出护轨
                         .build();
             }
 
@@ -150,6 +135,8 @@ public class AiCodeGeneratorServiceFactory {
                         .chatModel(chatModel)
                         .streamingChatModel(openAiStreamingChatModel)
                         .chatMemory(chatMemory)
+                        .inputGuardrails(new PromptSafetyInputGuardrail()) // 添加输入护轨
+                        .outputGuardrails(new RetryOutputGuardrail()) // 添加输出护轨
                         .build();
             }
 
